@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     paddingHorizontal: 4,
   },
-  getStartedText: {
+  title: {
     fontSize: 17,
     color: 'rgba(96,100,109, 1)',
     lineHeight: 24,
