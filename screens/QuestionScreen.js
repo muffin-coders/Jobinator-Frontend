@@ -30,7 +30,7 @@ export default class QuestionScreen extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+        <View style={styles.container} contentContainerStyle={styles.contentContainer}>
           <View style={styles.welcomeContainer}>
             <Image
               source={require('../assets/images/jobi.png')}
@@ -49,7 +49,11 @@ export default class QuestionScreen extends React.Component {
           {this.state.isWelcome &&
           <Button title={"Start"} onPress={() => this.initUser()} loading={this.state.isLoading}/>
           }
-        </ScrollView>
+        </View>
+        {this.state.isWelcome &&
+        <Text h6 style={styles.textSmall}>Finde deinen Job ganz einfach durch ein beantworten von ein paar
+          fragen.</Text>
+        }
       </View>
     );
   }
@@ -64,7 +68,7 @@ export default class QuestionScreen extends React.Component {
   }
 
   select = (id) => {
-    fetch(Settings.backend + '/users/2/questions/' + this.state.questions.questionId
+    fetch(Settings.backend + '/users/' + currentUser + '/questions/' + this.state.questions.questionId
       + '/answer/' + id, {
       method: 'POST',
     });
@@ -74,28 +78,29 @@ export default class QuestionScreen extends React.Component {
 
   loadButton = event => {
     console.log("load questions");
-    fetch(Settings.backend + '/users/2/questions', {
+    fetch(Settings.backend + '/users/' + currentUser + '/questions', {
       method: 'GET',
     })
       .then((response) => response.json())
       .then((responseJson) => {
         this.setState({isWelcome: false});
-        currentUser = responseJson;
+        this.setState({questions: responseJson});
+        console.log(this.state.questions);
       })
       .catch((error) => {
         console.log(error);
       });
   };
 
-  initUser(){
+  initUser() {
     this.setState({isLoading: true});
-    fetch(Settings.backend + '/users/', {
-      method: 'GET',
+    fetch(Settings.backend + '/users', {
+      method: 'POST',
     })
       .then((response) => response.json())
       .then((responseJson) => {
-        // this.setState({questions: responseJson});
-        // this.setState({isWelcome: false});
+        currentUser = responseJson.userId;
+        console.log(currentUser);
         this.loadButton();
       })
       .catch((error) => {
@@ -136,4 +141,8 @@ const styles = StyleSheet.create({
     marginTop: 3,
     marginLeft: -10,
   },
+  textSmall: {
+    fontFamily: 'nunito',
+    textAlign: 'center',
+  }
 });
