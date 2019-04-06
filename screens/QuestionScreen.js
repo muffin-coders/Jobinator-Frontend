@@ -43,23 +43,19 @@ export default class QuestionScreen extends React.Component {
             />
           </View>
           {this.state.isWelcome &&
-          <Text h3 style={styles.question}>Willkommen</Text>
+          <Text h4 style={styles.question}>Finde deinen Job ganz einfach durch beantworten von ein paar ganz einfachen Fragen</Text>
           }
           {!this.state.isWelcome &&
           <Text h3 style={styles.question}>{this.state.questions.question}</Text>
           }
-          {this.state.isWelcome &&
-          <Button title={"Start"} onPress={() => this.initUser()} loading={this.state.isLoading}/>
-          }
 
+          {this.state.isWelcome &&
+          <Button title={"JETZT LOS LEGEN!"} onPress={() => this.initUser()} loading={this.state.isLoading} style={styles.callToAction}/>
+          }
           <ScrollView>
           {this.renderButtons()}
           </ScrollView>
         </View>
-        {this.state.isWelcome &&
-        <Text h6 style={styles.textSmall}>Finde deinen Job ganz einfach durch ein beantworten von ein paar
-          fragen.</Text>
-        }
         {!this.state.isWelcome &&
         <Button
           title="Zu meinen Jobs"
@@ -69,7 +65,9 @@ export default class QuestionScreen extends React.Component {
           }
         />
         }
+        {!this.state.isWelcome &&
         <ProgressBar progress={this.state.progress} color={Colors.red800}/>
+        }
         <Snackbar
           visible={this.state.errorShow}
           onDismiss={() => this.setState({errorShow: false})}
@@ -177,5 +175,9 @@ const styles = StyleSheet.create({
   textSmall: {
     fontFamily: 'nunito',
     textAlign: 'center',
+  },
+  callToAction:{
+    paddingTop: 50,
+    fontFamily: 'nunito-bold',
   }
 });

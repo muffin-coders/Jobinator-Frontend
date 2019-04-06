@@ -1,23 +1,55 @@
 'use strict';
 
 import React from 'react';
-import {StyleSheet, Text, View, Image} from 'react-native';
+import {StyleSheet, Text, View, Image, Modal} from 'react-native';
 import {
-  Button,
+  Button, Card as CardView
 } from 'react-native-elements';
 
 import SwipeCards from 'react-native-swipe-cards';
+import Settings from "../constants/Settings";
 
 class Card extends React.Component {
   constructor(props) {
     super(props);
   }
 
+  state = {
+    modalVisible: false,
+  };
+
   render() {
     return (
       <View style={styles.card}>
-        <Image style={styles.thumbnail} source={{uri: this.props.image}} />
-        <Text style={styles.text}>This is card {this.props.name}</Text>
+        <Image style={styles.thumbnail} source={{uri: this.props.image}}/>
+        <Text style={styles.text}>{this.props.jobTitle}</Text>
+        <Button
+          title="Job Info anzeigen"
+          type="clear"
+          onPress={() => this.setState({modalVisible: true})}
+        />
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={this.state.modalVisible}
+          >
+          <View style={{marginTop: 22}}>
+            <View>
+              <CardView>
+                <Text>{this.props.jobText}</Text>
+
+                <Button
+                  title={"schliessen"}
+                  onPress={() => {
+                    this.setState({modalVisible: !this.state.modalVisible});
+                  }}>
+                  <Text>Hide Modal</Text>
+
+                </Button>
+              </CardView>
+            </View>
+          </View>
+        </Modal>
       </View>
     )
   }
@@ -44,53 +76,64 @@ class NoMoreCards extends React.Component {
   }
 }
 
-const cards = [
-  {name: '1', image: 'https://images.pexels.com/photos/567633/pexels-photo-567633.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500'},
-  {name: '2', image: 'https://images.pexels.com/photos/1161465/pexels-photo-1161465.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500'},
-  {name: '3', image: 'https://images.pexels.com/photos/327540/pexels-photo-327540.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500'},
-  {name: '4', image: 'https://images.pexels.com/photos/1249158/pexels-photo-1249158.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500'},
-]
-
-const cards2 = [
-  {name: '10', image: 'https://images.pexels.com/photos/684387/pexels-photo-684387.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500'},
-]
+let cards = [];
+let hasNextCard = true;
 
 export default class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       cards: cards,
-      outOfCards: false
-    }
+      outOfCards: false,
+      isReady: false
+    };
+    this.fetchNewCards();
   }
 
-  handleYup (card) {
+  fetchNewCards() {
+    let currentUser = 1;
+    fetch(Settings.backend + '/job/users/' + currentUser + '/previews/next', {
+      method: 'GET',
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        let card = responseJson;
+        console.log("fetchNewCards");
+        console.log(card);
+        console.log(card[0].isLast);
+
+        this.setState({isReady: true});
+        if (hasNextCard) {
+          this.setState({
+            cards: this.state.cards.concat(card),
+          });
+          hasNextCard = !card[0].isLast;
+        } else {
+          this.setState({outOfCards: true});
+        }
+      });
+  }
+
+  handleYup(card) {
     console.log("Gefällt mir")
   }
 
-  handleNope (card) {
+  handleNope(card) {
     console.log("Gefällt mir nicht")
   }
 
-  cardRemoved (index) {
-    console.log(`The index is ${index}`);
+  handleMaybe(card) {
 
-    let CARD_REFRESH_LIMIT = 3
+  }
 
-    if (this.state.cards.length - index <= CARD_REFRESH_LIMIT + 1) {
-      console.log(`There are only ${this.state.cards.length - index - 1} cards left.`);
+  handleClick(card) {
+    console.log("Click")
+  }
 
-      if (!this.state.outOfCards) {
-        console.log(`Adding ${cards2.length} more cards`)
-
-        this.setState({
-          cards: this.state.cards.concat(cards2),
-          outOfCards: true
-        })
-      }
-
-    }
-
+  cardRemoved(index) {
+    console.log("Karte");
+    console.log(cards);
+    this.fetchNewCards();
   }
 
   render() {
@@ -99,16 +142,25 @@ export default class App extends React.Component {
         cards={this.state.cards}
         loop={false}
 
-        renderCard={(cardData) => <Card {...cardData} />}
-        renderNoMoreCards={() => <NoMoreCards navigator={this.props.navigator} />}
+        renderCard={(cardData) => <Card {...cardData} navigator={this.props.navigator}/>}
+        renderNoMoreCards={() => <NoMoreCards navigator={this.props.navigator}/>}
         showYup={true}
         showNope={true}
+        showMaybe={true}
+
+        hasMaybeAction={true}
+        yupText={"Gefällt mir"}
+        nopeText={"Gefällt mir nicht"}
+        maybeText={"Favoritisieren"}
+
+        onClickHandler={this.handleClick}
 
         handleYup={this.handleYup}
         handleNope={this.handleNope}
+        handleMaybe={this.handleMaybe}
         cardRemoved={this.cardRemoved.bind(this)}
       />
-    )
+    );
   }
 }
 
@@ -136,4 +188,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   }
-})
+});

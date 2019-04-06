@@ -1,11 +1,7 @@
 import React from 'react';
 import {
-  Image,
   Platform,
-  ScrollView,
   StyleSheet,
-  Text,
-  TouchableOpacity,
   View,
 } from 'react-native';
 
@@ -19,7 +15,7 @@ export default class HomeScreen extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        <SwipeCards style={{flex: 1}} navigator={this.props.navigation} test={"hey"} />
+        <SwipeCards style={{flex: 1}} navigator={this.props.navigation} />
       </View>
     );
   }
