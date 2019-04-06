@@ -15,7 +15,7 @@ export default class HomeScreen extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        <SwipeCards style={{flex: 1}} navigator={this.props.navigation} />
+        <SwipeCards style={{flex: 1}} navigator={this.props.navigation}/>
       </View>
     );
   }

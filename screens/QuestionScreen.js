@@ -15,8 +15,7 @@ import Settings from '../constants/Settings';
 
 import {ProgressBar, Colors, Snackbar} from 'react-native-paper';
 
-let currentUser;
-
+global.currentUser = null;
 export default class QuestionScreen extends React.Component {
   static navigationOptions = {
     header: null,
@@ -95,7 +94,7 @@ export default class QuestionScreen extends React.Component {
 
   select = (id) => {
     this.setState({isLoading: true});
-    fetch(Settings.backend + '/users/' + currentUser + '/questions/' + this.state.questions.questionId
+    fetch(Settings.backend + '/users/' + global.currentUser + '/questions/' + this.state.questions.questionId
       + '/answer/' + id, {
       method: 'POST',
     });
@@ -105,7 +104,7 @@ export default class QuestionScreen extends React.Component {
 
   loadButton = event => {
     console.log("load questions");
-    fetch(Settings.backend + '/users/' + currentUser + '/questions', {
+    fetch(Settings.backend + '/users/' + global.currentUser + '/questions', {
       method: 'GET',
     })
       .then((response) => response.json())
@@ -129,8 +128,8 @@ export default class QuestionScreen extends React.Component {
     })
       .then((response) => response.json())
       .then((responseJson) => {
-        currentUser = responseJson.userId;
-        console.log(currentUser);
+        global.currentUser = responseJson.userId;
+        console.log(global.currentUser);
         this.loadButton();
       })
       .catch((error) => {

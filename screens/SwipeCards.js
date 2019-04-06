@@ -32,7 +32,7 @@ class Card extends React.Component {
           animationType="slide"
           transparent={true}
           visible={this.state.modalVisible}
-          >
+        >
           <View style={{marginTop: 22}}>
             <View>
               <CardView>
@@ -91,8 +91,8 @@ export default class App extends React.Component {
   }
 
   fetchNewCards() {
-    let currentUser = 1;
-    fetch(Settings.backend + '/job/users/' + currentUser + '/previews/next', {
+    console.log(global.currentUser)
+    fetch(Settings.backend + '/job/users/' + global.currentUser + '/previews/next', {
       method: 'GET',
     })
       .then((response) => response.json())
@@ -116,14 +116,22 @@ export default class App extends React.Component {
 
   handleYup(card) {
     console.log("Gefällt mir")
+    fetch(Settings.backend + '/job/' + global.currentUser + '/users/previews/' + card.jobPreviewId +'/dislike', {
+      method: 'POST',
+    });
   }
 
   handleNope(card) {
     console.log("Gefällt mir nicht")
+    fetch(Settings.backend + '/job/' + global.currentUser + '/users/previews/' + card.jobPreviewId +'/like', {
+      method: 'POST',
+    });
   }
 
   handleMaybe(card) {
-
+    fetch(Settings.backend + '/job/' + global.currentUser + '/users/previews/' + card.jobPreviewId +'/favorite', {
+      method: 'POST',
+    });
   }
 
   handleClick(card) {
