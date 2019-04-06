@@ -2,6 +2,7 @@ import React from 'react';
 import _ from 'lodash';
 
 import {
+  Image,
   ScrollView,
   StyleSheet,
   View,
@@ -12,6 +13,8 @@ import {
 } from 'react-native-elements';
 import Settings from '../constants/Settings';
 
+let currentUser;
+
 export default class QuestionScreen extends React.Component {
   static navigationOptions = {
     header: null,
@@ -21,13 +24,19 @@ export default class QuestionScreen extends React.Component {
     questions: {},
     answers: {},
     isWelcome: true,
+    isLoading: false,
   };
 
   render() {
     return (
       <View style={styles.container}>
         <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-          <Text h1 style={styles.title}>Jobinator</Text>
+          <View style={styles.welcomeContainer}>
+            <Image
+              source={require('../assets/images/jobi.png')}
+              style={styles.welcomeImage}
+            />
+          </View>
           {this.state.isWelcome &&
           <Text h3 style={styles.question}>Willkommen</Text>
           }
@@ -38,27 +47,21 @@ export default class QuestionScreen extends React.Component {
           {this.renderButtons()}
 
           {this.state.isWelcome &&
-          <Button title={"Start"} onPress={() => this.loadButton()}/>
+          <Button title={"Start"} onPress={() => this.initUser()} loading={this.state.isLoading}/>
           }
         </ScrollView>
       </View>
     );
   }
 
-  loadButton = event => {
-    console.log("load questions");
-    fetch(Settings.backend + '/users/2/questions', {
-      method: 'GET',
-    })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        this.setState({questions: responseJson});
-        this.setState({isWelcome: false});
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  };
+  renderButtons() {
+    return _.map(this.state.questions.answers, (answers) => {
+      return (
+        <Button title={answers.answerText} style={styles.question} key={answers.answerId}
+                onPress={() => this.select(answers.answerId)}/>
+      )
+    });
+  }
 
   select = (id) => {
     fetch(Settings.backend + '/users/2/questions/' + this.state.questions.questionId
@@ -69,13 +72,35 @@ export default class QuestionScreen extends React.Component {
     this.loadButton();
   };
 
-  renderButtons() {
-    return _.map(this.state.questions.answers, (answers) => {
-      return (
-        <Button title={answers.answerText} style={styles.question} key={answers.answerId}
-                onPress={() => this.select(answers.answerId)}/>
-      )
-    });
+  loadButton = event => {
+    console.log("load questions");
+    fetch(Settings.backend + '/users/2/questions', {
+      method: 'GET',
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        this.setState({isWelcome: false});
+        currentUser = responseJson;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  initUser(){
+    this.setState({isLoading: true});
+    fetch(Settings.backend + '/users/', {
+      method: 'GET',
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        // this.setState({questions: responseJson});
+        // this.setState({isWelcome: false});
+        this.loadButton();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
 }
 
@@ -88,11 +113,6 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingTop: 30,
   },
-  title: {
-    fontFamily: 'nunito',
-    textAlign: 'center',
-    padding: 20,
-  },
   question: {
     fontFamily: 'nunito',
     textAlign: 'center',
@@ -103,5 +123,17 @@ const styles = StyleSheet.create({
     fontSize: 40,
     fontFamily: 'nunito',
     paddingTop: 10,
-  }
+  },
+  welcomeContainer: {
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 20,
+  },
+  welcomeImage: {
+    width: 600,
+    height: 100,
+    resizeMode: 'contain',
+    marginTop: 3,
+    marginLeft: -10,
+  },
 });

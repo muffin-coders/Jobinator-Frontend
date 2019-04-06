@@ -1,0 +1,14 @@
+
+Hope you enjoy your new logo, here are the people that
+made your beautiful logo happen :)
+
+font name: Ubuntu-R
+font link: https://fonts.google.com/specimen/Ubuntu
+font author: Dalton Maag
+font author site: http://www.daltonmaag.com/
+
+icon designer: b farias
+icon designer link: /bfarias
+        
+{"bg":"#ffffff","icon-gradient-0":"#288B58","icon-gradient-1":"#1522F1","font":"#000000"}
+      
