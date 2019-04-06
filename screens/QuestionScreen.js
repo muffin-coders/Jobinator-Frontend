@@ -3,7 +3,7 @@ import _ from 'lodash';
 
 import {
   Image,
-  ScrollView,
+  ScrollView, default as Share,
   StyleSheet,
   View,
 } from 'react-native';
