@@ -16,9 +16,29 @@ class Card extends React.Component {
 
   state = {
     modalVisible: false,
+    preview: null,
   };
 
+  modalButtonPressed() {
+    fetch(Settings.backend + '/job/' + currentUser + '/users/previews/' + this.props.jobPreviewId + '/detail', {
+      method: 'POST',
+    })
+        .then((response) => response.json())
+        .then((responseJson) => {
+          let preview = responseJson;
+          console.log("clickJob");
+          console.log(preview);
+
+          this.setState({
+            preview: preview,
+          });
+          this.setState({modalVisible: true});
+        });
+    return undefined;
+  }
+
   render() {
+
     return (
       <View style={styles.card}>
         <Image style={styles.thumbnail} source={{uri: this.props.image}}/>
@@ -26,7 +46,7 @@ class Card extends React.Component {
         <Button
           title="Job Info anzeigen"
           type="clear"
-          onPress={() => this.setState({modalVisible: true})}
+          onPress={() => this.modalButtonPressed()}
         />
         <Modal
           animationType="slide"
@@ -36,7 +56,7 @@ class Card extends React.Component {
           <View>
             <View style={{ height: 700, marginTop: 22 }}>
               <CardView style={{ height: 700 }}>
-                <Text style={{ height: 600 }}>{this.props.jobText}</Text>
+                <Text style={{ height: 600 }}>{this.state.preview.jobText}</Text>
 
                 <Button
                   title={"schliessen"}
@@ -91,7 +111,7 @@ export default class App extends React.Component {
   }
 
   fetchNewCards() {
-    let currentUser = 1;
+    //let currentUser = 1;
     fetch(Settings.backend + '/job/users/' + currentUser + '/previews/next', {
       method: 'GET',
     })
@@ -100,17 +120,18 @@ export default class App extends React.Component {
         let card = responseJson;
         console.log("fetchNewCards");
         console.log(card);
-        console.log(card[0].isLast);
-
-        this.setState({isReady: true});
-        if (hasNextCard) {
-          this.setState({
-            cards: this.state.cards.concat(card),
-          });
-          hasNextCard = !card[0].isLast;
-        } else {
-          this.setState({outOfCards: true});
-        }
+        //console.log(card[0].isLast);
+if (card[0] !== undefined) {
+  this.setState({isReady: true});
+  if (hasNextCard) {
+    this.setState({
+      cards: this.state.cards.concat(card),
+    });
+    hasNextCard = !card[0].isLast;
+  } else {
+    this.setState({outOfCards: true});
+  }
+}
       });
   }
 
