@@ -15,8 +15,7 @@ import Settings from '../constants/Settings';
 
 import {ProgressBar, Colors, Snackbar} from 'react-native-paper';
 
-let currentUser;
-
+global.currentUser = null;
 export default class QuestionScreen extends React.Component {
   static navigationOptions = {
     header: null,
@@ -32,6 +31,11 @@ export default class QuestionScreen extends React.Component {
     errorText: "",
   };
 
+  constructor(props) {
+    super(props);
+    this.initUser();
+  }
+
   render() {
     return (
       <View style={styles.container}>
@@ -43,17 +47,19 @@ export default class QuestionScreen extends React.Component {
             />
           </View>
           {this.state.isWelcome &&
-          <Text h4 style={styles.question}>Finde deinen Job ganz einfach durch beantworten von ein paar ganz einfachen Fragen</Text>
+          <Text h4 style={styles.question}>Finde deinen Job ganz einfach durch beantworten von ein paar ganz einfachen
+            Fragen</Text>
           }
           {!this.state.isWelcome &&
           <Text h3 style={styles.question}>{this.state.questions.question}</Text>
           }
 
           {this.state.isWelcome &&
-          <Button title={"JETZT LOS LEGEN!"} onPress={() => this.initUser()} loading={this.state.isLoading} style={styles.callToAction}/>
+          <Button title={"JETZT LOS LEGEN!"} onPress={() => this.initButton()} loading={this.state.isLoading}
+                  style={styles.callToAction}/>
           }
           <ScrollView>
-          {this.renderButtons()}
+            {this.renderButtons()}
           </ScrollView>
         </View>
         {!this.state.isWelcome &&
@@ -95,7 +101,7 @@ export default class QuestionScreen extends React.Component {
 
   select = (id) => {
     this.setState({isLoading: true});
-    fetch(Settings.backend + '/users/' + currentUser + '/questions/' + this.state.questions.questionId
+    fetch(Settings.backend + '/users/' + global.currentUser + '/questions/' + this.state.questions.questionId
       + '/answer/' + id, {
       method: 'POST',
     });
@@ -105,7 +111,7 @@ export default class QuestionScreen extends React.Component {
 
   loadButton = event => {
     console.log("load questions");
-    fetch(Settings.backend + '/users/' + currentUser + '/questions', {
+    fetch(Settings.backend + '/users/' + global.currentUser + '/questions', {
       method: 'GET',
     })
       .then((response) => response.json())
@@ -122,21 +128,24 @@ export default class QuestionScreen extends React.Component {
   };
 
   initUser() {
-    this.setState({isLoading: true});
-    this.setState({progress: 0.1});
     fetch(Settings.backend + '/users', {
       method: 'POST',
     })
       .then((response) => response.json())
       .then((responseJson) => {
-        currentUser = responseJson.userId;
-        console.log(currentUser);
-        this.loadButton();
+        global.currentUser = responseJson.userId;
+        console.log(global.currentUser);
       })
       .catch((error) => {
         this.setState({errorShow: true});
         this.setState({errorText: "Keine Datenanbingung"});
       });
+  }
+
+  initButton() {
+    this.setState({isLoading: true});
+    this.setState({progress: 0.1});
+    this.loadButton();
   }
 }
 
@@ -176,7 +185,7 @@ const styles = StyleSheet.create({
     fontFamily: 'nunito',
     textAlign: 'center',
   },
-  callToAction:{
+  callToAction: {
     paddingTop: 50,
     fontFamily: 'nunito-bold',
   }
