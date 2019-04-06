@@ -78,6 +78,7 @@ class NoMoreCards extends React.Component {
 
 let cards = [];
 let hasNextCard = true;
+let currentCard = {};
 
 export default class App extends React.Component {
   constructor(props) {
@@ -90,7 +91,8 @@ export default class App extends React.Component {
     this.fetchNewCards();
   }
 
-  fetchNewCards() {
+  fetchNewCards = () => {
+    console.log("fetchNewCardsMethod");
     console.log(global.currentUser)
     fetch(Settings.backend + '/job/users/' + global.currentUser + '/previews/next', {
       method: 'GET',
@@ -102,36 +104,42 @@ export default class App extends React.Component {
         console.log(card);
         console.log(card[0].isLast);
 
-        this.setState({isReady: true});
+        this.setState({isReady: true, outOfCards: false});
         if (hasNextCard) {
           this.setState({
-            cards: this.state.cards.concat(card),
+            cards: card,
           });
           hasNextCard = !card[0].isLast;
         } else {
           this.setState({outOfCards: true});
         }
       });
-  }
+  };
 
   handleYup(card) {
-    console.log("Gefällt mir")
-    fetch(Settings.backend + '/job/' + global.currentUser + '/users/previews/' + card.jobPreviewId +'/dislike', {
+    console.log("Gefällt mir");
+    fetch(Settings.backend + '/job/' + global.currentUser + '/users/previews/' + card.jobPreviewId + '/like', {
       method: 'POST',
-    });
+    }).finally(response => {
+      this.fetchNewCards();
+    })
   }
 
   handleNope(card) {
-    console.log("Gefällt mir nicht")
-    fetch(Settings.backend + '/job/' + global.currentUser + '/users/previews/' + card.jobPreviewId +'/like', {
+    console.log("Gefällt mir nicht");
+    fetch(Settings.backend + '/job/' + global.currentUser + '/users/previews/' + card.jobPreviewId + '/dislike', {
       method: 'POST',
-    });
+    }).finally(response => {
+      this.fetchNewCards();
+    })
   }
 
   handleMaybe(card) {
-    fetch(Settings.backend + '/job/' + global.currentUser + '/users/previews/' + card.jobPreviewId +'/favorite', {
+    fetch(Settings.backend + '/job/' + global.currentUser + '/users/previews/' + card.jobPreviewId + '/favorite', {
       method: 'POST',
-    });
+    }).finally(response => {
+      this.fetchNewCards();
+    })
   }
 
   handleClick(card) {
@@ -139,9 +147,6 @@ export default class App extends React.Component {
   }
 
   cardRemoved(index) {
-    console.log("Karte");
-    console.log(cards);
-    this.fetchNewCards();
   }
 
   render() {
@@ -163,9 +168,9 @@ export default class App extends React.Component {
 
         onClickHandler={this.handleClick}
 
-        handleYup={this.handleYup}
-        handleNope={this.handleNope}
-        handleMaybe={this.handleMaybe}
+        handleYup={this.handleYup.bind(this)}
+        handleNope={this.handleNope.bind(this)}
+        handleMaybe={this.handleMaybe.bind(this)}
         cardRemoved={this.cardRemoved.bind(this)}
       />
     );

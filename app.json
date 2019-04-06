@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Jobinator",
-    "slug": "Find your Job on Jobinator",
+    "slug": "Jobinator",
     "privacy": "public",
     "sdkVersion": "32.0.0",
     "platforms": [
