@@ -16,6 +16,7 @@ import Settings from '../constants/Settings';
 import {ProgressBar, Colors, Snackbar} from 'react-native-paper';
 
 global.currentUser = null;
+
 export default class QuestionScreen extends React.Component {
   static navigationOptions = {
     header: null,
@@ -29,6 +30,8 @@ export default class QuestionScreen extends React.Component {
     progress: 0.0,
     errorShow: false,
     errorText: "",
+    maxAmountJobs: 0,
+    currentAmountJobs: 0,
   };
 
   constructor(props) {
@@ -74,6 +77,9 @@ export default class QuestionScreen extends React.Component {
         {!this.state.isWelcome &&
         <ProgressBar progress={this.state.progress} color={Colors.red800}/>
         }
+        {this.state.currentAmountJobs !== 0 &&
+        <Text style={styles.textSmall}>{this.state.currentAmountJobs} von {this.state.maxAmountJobs} vorhanden</Text>
+        }
         <Snackbar
           visible={this.state.errorShow}
           onDismiss={() => this.setState({errorShow: false})}
@@ -104,6 +110,13 @@ export default class QuestionScreen extends React.Component {
     fetch(Settings.backend + '/users/' + global.currentUser + '/questions/' + this.state.questions.questionId
       + '/answer/' + id, {
       method: 'POST',
+    }).then((response) => response.json()).then((responseJson) => {
+      console.log(responseJson);
+      this.setState({
+        progress: 1.0 - (responseJson.currentAmountJobs / responseJson.maxAmountJobs),
+        currentAmountJobs: responseJson.currentAmountJobs,
+        maxAmountJobs: responseJson.maxAmountJobs,
+      });
     });
     console.log(id);
     this.loadButton();
@@ -144,7 +157,6 @@ export default class QuestionScreen extends React.Component {
 
   initButton() {
     this.setState({isLoading: true});
-    this.setState({progress: 0.1});
     this.loadButton();
   }
 }
