@@ -14,7 +14,6 @@ import {
 import Settings from '../constants/Settings';
 
 import {ProgressBar, Colors, Snackbar} from 'react-native-paper';
-import HomeScreen from "./HomeScreen";
 
 let currentUser;
 
@@ -66,7 +65,7 @@ export default class QuestionScreen extends React.Component {
           title="Zu meinen Jobs"
           type="outline"
           onPress={() =>
-            this.props.navigation.navigate('Job')
+            this.props.navigator.navigate('Job')
           }
         />
         }

@@ -10,7 +10,7 @@ import SettingsScreen from '../screens/SettingsScreen';
 import JobScreen from "../screens/JobScreen";
 
 const QuestionStack = createStackNavigator({
-  Questions: QuestionScreen,
+  Question: QuestionScreen,
 });
 
 QuestionStack.navigationOptions = {
@@ -46,7 +46,7 @@ const SettingsStack = createStackNavigator({
 });
 
 SettingsStack.navigationOptions = {
-  tabBarLabel: 'Settings',
+  tabBarLabel: 'Einstellungen',
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused={focused}
