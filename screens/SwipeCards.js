@@ -16,7 +16,7 @@ class Card extends React.Component {
 
   state = {
     modalVisible: false,
-    preview: null,
+    preview: {jobText: "", jobTitle: "",},
   };
 
   modalButtonPressed() {
@@ -25,12 +25,13 @@ class Card extends React.Component {
     })
         .then((response) => response.json())
         .then((responseJson) => {
-          let preview = responseJson;
+          let previews = responseJson;
+          console.log(this.props.jobPreviewId);
           console.log("clickJob");
-          console.log(preview);
+          console.log(previews);
 
           this.setState({
-            preview: preview,
+            preview: previews,
           });
           this.setState({modalVisible: true});
         });
@@ -111,8 +112,7 @@ export default class App extends React.Component {
   }
 
   fetchNewCards() {
-    //let currentUser = 1;
-    fetch(Settings.backend + '/job/users/' + currentUser + '/previews/next', {
+    fetch(Settings.backend + '/job/users/' + global.currentUser + '/previews/next', {
       method: 'GET',
     })
       .then((response) => response.json())
@@ -194,11 +194,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderWidth: 1,
     elevation: 1,
-  },
-  buttonbottom: {
-      //position: 'absolute',
-      //bottom: 22,
-
   },
   thumbnail: {
     width: 300,
