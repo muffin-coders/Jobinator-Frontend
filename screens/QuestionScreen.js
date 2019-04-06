@@ -13,6 +13,9 @@ import {
 } from 'react-native-elements';
 import Settings from '../constants/Settings';
 
+import {ProgressBar, Colors, Snackbar} from 'react-native-paper';
+import HomeScreen from "./HomeScreen";
+
 let currentUser;
 
 export default class QuestionScreen extends React.Component {
@@ -25,6 +28,9 @@ export default class QuestionScreen extends React.Component {
     answers: {},
     isWelcome: true,
     isLoading: false,
+    progress: 0.0,
+    errorShow: false,
+    errorText: "",
   };
 
   render() {
@@ -43,17 +49,40 @@ export default class QuestionScreen extends React.Component {
           {!this.state.isWelcome &&
           <Text h3 style={styles.question}>{this.state.questions.question}</Text>
           }
-
-          {this.renderButtons()}
-
           {this.state.isWelcome &&
           <Button title={"Start"} onPress={() => this.initUser()} loading={this.state.isLoading}/>
           }
+
+          <ScrollView>
+          {this.renderButtons()}
+          </ScrollView>
         </View>
         {this.state.isWelcome &&
         <Text h6 style={styles.textSmall}>Finde deinen Job ganz einfach durch ein beantworten von ein paar
           fragen.</Text>
         }
+        {!this.state.isWelcome &&
+        <Button
+          title="Zu meinen Jobs"
+          type="outline"
+          onPress={() =>
+            this.props.navigation.navigate('Job')
+          }
+        />
+        }
+        <ProgressBar progress={this.state.progress} color={Colors.red800}/>
+        <Snackbar
+          visible={this.state.errorShow}
+          onDismiss={() => this.setState({errorShow: false})}
+          action={{
+            label: 'ok',
+            onPress: () => {
+              // Do something
+            },
+          }}
+        >
+          {this.state.errorText}
+        </Snackbar>
       </View>
     );
   }
@@ -62,12 +91,13 @@ export default class QuestionScreen extends React.Component {
     return _.map(this.state.questions.answers, (answers) => {
       return (
         <Button title={answers.answerText} style={styles.question} key={answers.answerId}
-                onPress={() => this.select(answers.answerId)}/>
+                onPress={() => this.select(answers.answerId)} loading={this.state.isLoading}/>
       )
     });
   }
 
   select = (id) => {
+    this.setState({isLoading: true});
     fetch(Settings.backend + '/users/' + currentUser + '/questions/' + this.state.questions.questionId
       + '/answer/' + id, {
       method: 'POST',
@@ -86,14 +116,17 @@ export default class QuestionScreen extends React.Component {
         this.setState({isWelcome: false});
         this.setState({questions: responseJson});
         console.log(this.state.questions);
+        this.setState({isLoading: false});
       })
       .catch((error) => {
-        console.log(error);
+        this.setState({errorShow: true});
+        this.setState({errorText: "Keine Datenanbingung"});
       });
   };
 
   initUser() {
     this.setState({isLoading: true});
+    this.setState({progress: 0.1});
     fetch(Settings.backend + '/users', {
       method: 'POST',
     })
@@ -104,7 +137,8 @@ export default class QuestionScreen extends React.Component {
         this.loadButton();
       })
       .catch((error) => {
-        console.log(error);
+        this.setState({errorShow: true});
+        this.setState({errorText: "Keine Datenanbingung"});
       });
   }
 }
