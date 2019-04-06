@@ -16,9 +16,29 @@ class Card extends React.Component {
 
   state = {
     modalVisible: false,
+    preview: null,
   };
 
+  modalButtonPressed() {
+    fetch(Settings.backend + '/job/' + currentUser + '/users/previews/' + this.props.jobPreviewId + '/detail', {
+      method: 'POST',
+    })
+        .then((response) => response.json())
+        .then((responseJson) => {
+          let preview = responseJson;
+          console.log("clickJob");
+          console.log(preview);
+
+          this.setState({
+            preview: preview,
+          });
+          this.setState({modalVisible: true});
+        });
+    return undefined;
+  }
+
   render() {
+
     return (
       <View style={styles.card}>
         <Image style={styles.thumbnail} source={{uri: this.props.image}}/>
@@ -26,23 +46,23 @@ class Card extends React.Component {
         <Button
           title="Job Info anzeigen"
           type="clear"
-          onPress={() => this.setState({modalVisible: true})}
+          onPress={() => this.modalButtonPressed()}
         />
         <Modal
           animationType="slide"
-          transparent={true}
+          transparent={false}
           visible={this.state.modalVisible}
-        >
-          <View style={{marginTop: 22}}>
-            <View>
-              <CardView>
-                <Text>{this.props.jobText}</Text>
+          >
+          <View>
+            <View style={{ height: 700, marginTop: 22 }}>
+              <CardView style={{ height: 700 }}>
+                <Text style={{ height: 600 }}>{this.state.preview.jobText}</Text>
 
                 <Button
                   title={"schliessen"}
                   onPress={() => {
                     this.setState({modalVisible: !this.state.modalVisible});
-                  }}>
+                  }} style={styles.buttonbottom}>
                   <Text>Hide Modal</Text>
 
                 </Button>
@@ -78,7 +98,6 @@ class NoMoreCards extends React.Component {
 
 let cards = [];
 let hasNextCard = true;
-let currentCard = {};
 
 export default class App extends React.Component {
   constructor(props) {
@@ -91,10 +110,9 @@ export default class App extends React.Component {
     this.fetchNewCards();
   }
 
-  fetchNewCards = () => {
-    console.log("fetchNewCardsMethod");
-    console.log(global.currentUser)
-    fetch(Settings.backend + '/job/users/' + global.currentUser + '/previews/next', {
+  fetchNewCards() {
+    //let currentUser = 1;
+    fetch(Settings.backend + '/job/users/' + currentUser + '/previews/next', {
       method: 'GET',
     })
       .then((response) => response.json())
@@ -102,44 +120,31 @@ export default class App extends React.Component {
         let card = responseJson;
         console.log("fetchNewCards");
         console.log(card);
-        console.log(card[0].isLast);
-
-        this.setState({isReady: true, outOfCards: false});
-        if (hasNextCard) {
-          this.setState({
-            cards: card,
-          });
-          hasNextCard = !card[0].isLast;
-        } else {
-          this.setState({outOfCards: true});
-        }
+        //console.log(card[0].isLast);
+if (card[0] !== undefined) {
+  this.setState({isReady: true});
+  if (hasNextCard) {
+    this.setState({
+      cards: this.state.cards.concat(card),
+    });
+    hasNextCard = !card[0].isLast;
+  } else {
+    this.setState({outOfCards: true});
+  }
+}
       });
-  };
+  }
 
   handleYup(card) {
-    console.log("Gefällt mir");
-    fetch(Settings.backend + '/job/' + global.currentUser + '/users/previews/' + card.jobPreviewId + '/like', {
-      method: 'POST',
-    }).finally(response => {
-      this.fetchNewCards();
-    })
+    console.log("Gefällt mir")
   }
 
   handleNope(card) {
-    console.log("Gefällt mir nicht");
-    fetch(Settings.backend + '/job/' + global.currentUser + '/users/previews/' + card.jobPreviewId + '/dislike', {
-      method: 'POST',
-    }).finally(response => {
-      this.fetchNewCards();
-    })
+    console.log("Gefällt mir nicht")
   }
 
   handleMaybe(card) {
-    fetch(Settings.backend + '/job/' + global.currentUser + '/users/previews/' + card.jobPreviewId + '/favorite', {
-      method: 'POST',
-    }).finally(response => {
-      this.fetchNewCards();
-    })
+
   }
 
   handleClick(card) {
@@ -147,6 +152,9 @@ export default class App extends React.Component {
   }
 
   cardRemoved(index) {
+    console.log("Karte");
+    console.log(cards);
+    this.fetchNewCards();
   }
 
   render() {
@@ -168,9 +176,9 @@ export default class App extends React.Component {
 
         onClickHandler={this.handleClick}
 
-        handleYup={this.handleYup.bind(this)}
-        handleNope={this.handleNope.bind(this)}
-        handleMaybe={this.handleMaybe.bind(this)}
+        handleYup={this.handleYup}
+        handleNope={this.handleNope}
+        handleMaybe={this.handleMaybe}
         cardRemoved={this.cardRemoved.bind(this)}
       />
     );
@@ -186,6 +194,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderWidth: 1,
     elevation: 1,
+  },
+  buttonbottom: {
+      //position: 'absolute',
+      //bottom: 22,
+
   },
   thumbnail: {
     width: 300,
