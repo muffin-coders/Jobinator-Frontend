@@ -23,18 +23,18 @@ class Card extends React.Component {
     fetch(Settings.backend + '/job/' + currentUser + '/users/previews/' + this.props.jobPreviewId + '/detail', {
       method: 'POST',
     })
-        .then((response) => response.json())
-        .then((responseJson) => {
-          let previews = responseJson;
-          console.log(this.props.jobPreviewId);
-          console.log("clickJob");
-          console.log(previews);
+      .then((response) => response.json())
+      .then((responseJson) => {
+        let previews = responseJson;
+        console.log(this.props.jobPreviewId);
+        console.log("clickJob");
+        console.log(previews);
 
-          this.setState({
-            preview: previews,
-          });
-          this.setState({modalVisible: true});
+        this.setState({
+          preview: previews,
         });
+        this.setState({modalVisible: true});
+      });
     return undefined;
   }
 
@@ -53,11 +53,11 @@ class Card extends React.Component {
           animationType="slide"
           transparent={false}
           visible={this.state.modalVisible}
-          >
+        >
           <View>
-            <View style={{ height: 700, marginTop: 22 }}>
-              <CardView style={{ height: 700 }}>
-                <Text style={{ height: 600 }}>{this.state.preview.jobText}</Text>
+            <View style={{height: 700, marginTop: 22}}>
+              <CardView style={{height: 700}}>
+                <Text style={{height: 600}}>{this.state.preview.jobText}</Text>
 
                 <Button
                   title={"schliessen"}
@@ -112,6 +112,8 @@ export default class App extends React.Component {
   }
 
   fetchNewCards() {
+    console.log("fetchNewCardsMethod");
+    console.log(global.currentUser);
     fetch(Settings.backend + '/job/users/' + global.currentUser + '/previews/next', {
       method: 'GET',
     })
@@ -120,31 +122,45 @@ export default class App extends React.Component {
         let card = responseJson;
         console.log("fetchNewCards");
         console.log(card);
-        //console.log(card[0].isLast);
-if (card[0] !== undefined) {
-  this.setState({isReady: true});
-  if (hasNextCard) {
-    this.setState({
-      cards: this.state.cards.concat(card),
-    });
-    hasNextCard = !card[0].isLast;
-  } else {
-    this.setState({outOfCards: true});
-  }
-}
+
+        if (card[0] !== undefined) {
+          this.setState({isReady: true, outOfCards: false});
+          if (hasNextCard) {
+            this.setState({
+              cards: card,
+            });
+            hasNextCard = !card[0].isLast;
+          } else {
+            this.setState({outOfCards: true});
+          }
+        }
       });
   }
 
   handleYup(card) {
-    console.log("Gefällt mir")
+    console.log("Gefällt mir");
+    fetch(Settings.backend + '/job/' + global.currentUser + '/users/previews/' + card.jobPreviewId + '/like', {
+      method: 'POST',
+    }).finally(response => {
+      this.fetchNewCards();
+    })
   }
 
   handleNope(card) {
-    console.log("Gefällt mir nicht")
+    console.log("Gefällt mir nicht");
+    fetch(Settings.backend + '/job/' + global.currentUser + '/users/previews/' + card.jobPreviewId + '/dislike', {
+      method: 'POST',
+    }).finally(response => {
+      this.fetchNewCards();
+    })
   }
 
   handleMaybe(card) {
-
+    fetch(Settings.backend + '/job/' + global.currentUser + '/users/previews/' + card.jobPreviewId + '/favorite', {
+      method: 'POST',
+    }).finally(response => {
+      this.fetchNewCards();
+    })
   }
 
   handleClick(card) {
@@ -152,9 +168,6 @@ if (card[0] !== undefined) {
   }
 
   cardRemoved(index) {
-    console.log("Karte");
-    console.log(cards);
-    this.fetchNewCards();
   }
 
   render() {
@@ -176,9 +189,9 @@ if (card[0] !== undefined) {
 
         onClickHandler={this.handleClick}
 
-        handleYup={this.handleYup}
-        handleNope={this.handleNope}
-        handleMaybe={this.handleMaybe}
+        handleYup={this.handleYup.bind(this)}
+        handleNope={this.handleNope.bind(this)}
+        handleMaybe={this.handleMaybe.bind(this)}
         cardRemoved={this.cardRemoved.bind(this)}
       />
     );
