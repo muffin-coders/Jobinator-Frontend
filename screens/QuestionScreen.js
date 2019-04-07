@@ -16,7 +16,8 @@ import Settings from '../constants/Settings';
 import {ProgressBar, Colors, Snackbar} from 'react-native-paper';
 
 global.currentUser = null;
-
+global.language = 'Deutsch';
+global.langCode = 'de';
 export default class QuestionScreen extends React.Component {
   static navigationOptions = {
     header: null,
@@ -124,6 +125,7 @@ export default class QuestionScreen extends React.Component {
 
   loadButton = event => {
     console.log("load questions");
+    // if(global.langCode !===)
     fetch(Settings.backend + '/users/' + global.currentUser + '/questions', {
       method: 'GET',
     })

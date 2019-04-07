@@ -4,6 +4,8 @@ import {Constants} from "expo";
 import {Image, SectionList, StyleSheet, Text, View} from "react-native";
 import Settings from "../constants/Settings";
 
+import SettingsListItem from './SettingsListItem';
+
 export default class SettingsScreen extends React.Component {
   static navigationOptions = {
     title: 'Einstellungen',
@@ -14,6 +16,7 @@ export default class SettingsScreen extends React.Component {
     const sections = [
       {data: [{value: manifest.sdkVersion}], title: 'sdkVersion'},
       {data: [{value: manifest.version}], title: 'version'},
+      {data: [{value: 'Language',type: 'lang'}], title: 'Sprache'},
       {
         data: [
           {
@@ -42,13 +45,25 @@ export default class SettingsScreen extends React.Component {
   };
 
   _renderItem = ({item}) => {
-    return (
-      <SectionContent>
-        <Text style={styles.sectionContentText}>
-          {item.value}
-        </Text>
-      </SectionContent>
-    );
+    if (item.type === 'lang') {
+      return (
+        <SectionContent>
+          <SettingsListItem
+            key='Sprache'
+            title={global.language}
+            onPress={() => this.props.navigation.navigate('LanguageSelector')}
+          />
+        </SectionContent>
+      );
+    } else {
+      return (
+        <SectionContent>
+          <Text style={styles.sectionContentText}>
+            {item.value}
+          </Text>
+        </SectionContent>
+      );
+    }
   };
 }
 
