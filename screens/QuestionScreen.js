@@ -124,22 +124,71 @@ export default class QuestionScreen extends React.Component {
   };
 
   loadButton = event => {
-    console.log("load questions");
-    // if(global.langCode !===)
-    fetch(Settings.backend + '/users/' + global.currentUser + '/questions', {
-      method: 'GET',
-    })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        this.setState({isWelcome: false});
-        this.setState({questions: responseJson});
-        console.log(this.state.questions);
-        this.setState({isLoading: false});
+    console.log(global.currentUser);
+    if (global.currentUser === undefined || global.currentUser == null) {
+      this.setState({errorShow: true});
+      this.setState({errorText: "User konnte nicht erstellt werden, bitte warten"});
+      this.initUser();
+      this.setState({isLoading: false});
+    } else {
+      console.log("load questions");
+      fetch(Settings.backend + '/users/' + global.currentUser + '/questions', {
+        method: 'GET',
       })
-      .catch((error) => {
-        this.setState({errorShow: true});
-        this.setState({errorText: "Keine Datenanbingung"});
-      });
+        .then((response) => response.json())
+        .then((responseJson) => {
+          if (global.langCode === 'de' || responseJson.questionId === -1) {
+            this.setState({isWelcome: false});
+            this.setState({questions: responseJson});
+            this.setState({isLoading: false});
+          } else {
+            console.log("Change Language");
+            console.log(responseJson);
+
+            // /translation/questions/{questionId}/{lang}
+            fetch(Settings.backend + '/translation/questions/' + responseJson.questionId + '/' + global.langCode, {
+              method: 'GET',
+            })
+              .then((response) => response.json())
+              .then((responseJson) => {
+                  console.log(responseJson);
+                  console.log(responseJson.question);
+                  this.setState({isLoading: false});
+                  this.setState({questions: responseJson});
+                  this.setState({isWelcome: false});
+
+
+                  let component = this;
+                  responseJson.answers.forEach(function (entry) {
+                    // /translation/answers/{answer}/{lang}
+                    fetch(Settings.backend + '/translation/answers/' + entry.answerId + '/' + global.langCode, {
+                      method: 'GET',
+                    }).then((response) => response.json())
+                      .then((responseJson) => {
+                        component.setState({errorShow: true});
+                        component.setState({errorText: responseJson.answerText});
+                        // component.state.questions.answers.push(responseJson);
+                        // component.questions.answers.forEach(function (entryJson) {
+                        //   console.log("Hoo")
+                        //   console.log(entry)
+                        //   console.log(entryJson)
+                        //   if (entryJson.answerId === entry.answerId) {
+                        //     entry.answerText = entryJson.answerText;
+                        //     console.log(entry)
+                        //   }
+                        // })
+                      });
+                    console.log(entry);
+                  });
+                }
+              )
+          }
+        })
+        .catch((error) => {
+          this.setState({errorShow: true});
+          this.setState({errorText: "Keine Datenanbingung"});
+        });
+    }
   };
 
   initUser() {
