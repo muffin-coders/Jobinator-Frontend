@@ -169,7 +169,6 @@ export default class QuestionScreen extends React.Component {
                         component.setState({errorText: responseJson.answerText});
                         // component.state.questions.answers.push(responseJson);
                         // component.questions.answers.forEach(function (entryJson) {
-                        //   console.log("Hoo")
                         //   console.log(entry)
                         //   console.log(entryJson)
                         //   if (entryJson.answerId === entry.answerId) {
